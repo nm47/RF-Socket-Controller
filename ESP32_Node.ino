@@ -9,10 +9,14 @@
 #include<WiFiServer.h>
 #include<WiFiClient.h>
 
+//Pin connected to RF tranceiver
+//Two repeats to ensure successful toggle.
+
 #define TRANSMITTER_PIN 32
 #define PORT 23
 #define SENDREPEATS 2
 
+//Static IP to access through browser
 WiFiClient RemoteClient;
 WiFiServer server(PORT);
 ESPiLight rf(TRANSMITTER_PIN);
@@ -20,9 +24,12 @@ IPAddress Ip(192, 168, 1, 123);
 IPAddress NMask(255, 255, 255, 0); // netmask
 IPAddress GWDNS(192, 168, 1, 1); // gateway and dns
 
-const char* ssid = "WIN_5615";
-const char* passwd = "2948527807";
+const char* ssid = "SSID";
+const char* passwd = "PASSWORD";
 
+//Starts wifi, setsleep to false because there
+// were wifi stability issues. May not be necessary
+//in your setup.
 void setup() {
   Serial.begin(115200);
   pinMode(TRANSMITTER_PIN, OUTPUT);
@@ -35,12 +42,14 @@ void setup() {
   server.begin();
 }
 
-
+// Necessary due to wifi stability issues,
+// probably a good idea to have anyway though.
 void loop() {
   CheckForConnections();
   ReconnectIfDown();
 }
 
+// Use pilight library to send socket codes.
 void send(int socket, int state) {  
   for (int i = 0; i < SENDREPEATS; i++){
     switch (socket) {
@@ -83,7 +92,8 @@ void send(int socket, int state) {
 	  }
   }
 }
- 
+
+//Check if someone is trying to connect.
 void CheckForConnections()
 {
   if (server.hasClient())
